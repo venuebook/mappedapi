@@ -6,6 +6,8 @@ from settings.API_MAPPING import RESOURCE_MAPPING, RESOURCE_ACTIONS
 class APIResource(object):
     """Top Level API Resource"""
 
+    ITEM_CLASS = None
+
     def __init__(self, auth, items):
         self.auth = auth
         self.items = items
@@ -24,8 +26,10 @@ class APIResource(object):
 
     def __getattr__(self, attr):
         """getattr override to allow calling actions and nested resources eg client.users"""
+        if not ITEM_CLASS:
+            raise Exception('Error: APIResource.ITEM_CLASS not set.')
         if attr in self.items:
-            return APIResourceItem(self.auth, self.items[attr], nested=(attr not in RESOURCE_ACTIONS))
+            return self.ITEM_CLASS(self.auth, self.items[attr], nested=(attr not in RESOURCE_ACTIONS))
         return self.__getattribute__(attr)
 
 class APIResourceItem(object):
@@ -81,7 +85,7 @@ class APIResourceItem(object):
     def __getattr__(self, attr):
         """getattr override to allow calling nested resources eg client.users.badge"""
         if attr in self.nested_actions:
-            return APIResourceItem(self.auth, self.nested_actions[attr], nested=(attr not in RESOURCE_ACTIONS))
+            return self.__class__(self.auth, self.nested_actions[attr], nested=(attr not in RESOURCE_ACTIONS))
         return self.__getattribute__(attr)
 
     def _get_base_url(self):
