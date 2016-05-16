@@ -114,3 +114,28 @@ class APIResourceItem(object):
         """
         return kwargs
 
+class Client(object):
+    """Base object for API Client."""
+
+    RESOURCE_CLASS = None
+
+    def __init__(self, access_token):
+        """
+        Example Usage:
+
+        Client(access_token=config.ACCESS_TOKEN)
+
+        :param string access_token: Access Token
+        """
+        self.auth = {'token': access_token}
+
+    def __getattr__(self, attr):
+        """getattr override to allow calling API Resources eg client.users"""
+        if not self.__class__.RESOURCE_CLASS:
+            raise Exception('Error: Client.RESOURCE_CLASS not set.')
+        resource = self.RESOURCE_CLASS.map(self.auth, attr)
+        if not resource:
+            raise AttributeError("'Client' object has no attribute '%s'" % attr)
+        return resource
+
+
