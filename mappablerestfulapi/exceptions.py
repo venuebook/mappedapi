@@ -23,7 +23,7 @@ class MappableRESTfulAPIRequestError(Exception):
             'status_code': response.status_code,
             'url': request.url,
         }
-        super(MappableRESTfulAPIError, self).__init__(message)
+        super(MappableRESTfulAPIRequestError, self).__init__(message)
         self.message = message
         self.request = request
         self.response = response

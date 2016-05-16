@@ -1,12 +1,19 @@
 import itertools
 import requests
-from mappable_api.exceptions import MappableRESTfulAPIRequestError
-from settings.API_MAPPING import RESOURCE_MAPPING, RESOURCE_ACTIONS
+from mappablerestfulapi.exceptions import MappableRESTfulAPIRequestError
+
+class APIRegistry(object):
+    """Manage API Classes"""
+    def __init__(self, resource_class, item_class, resource_mapping, resource_actions)
+
+    def 
 
 class APIResource(object):
     """Top Level API Resource"""
 
     ITEM_CLASS = None
+    RESOURCE_MAPPING = []
+    RESOURCE_ACTIONS = []
 
     def __init__(self, auth, items):
         self.auth = auth
@@ -20,20 +27,25 @@ class APIResource(object):
         :return: API Resource
         :rtype: ``APIResource``
         """
-        if not resource in RESOURCE_MAPPING:
+        if not resource in cls.RESOURCE_MAPPING:
             return None
-        return cls(auth=auth, items=RESOURCE_MAPPING[resource])
+        return cls(auth=auth, items=cls.RESOURCE_MAPPING[resource])
 
     def __getattr__(self, attr):
         """getattr override to allow calling actions and nested resources eg client.users"""
-        if not ITEM_CLASS:
+        if not self.__class__.ITEM_CLASS:
             raise Exception('Error: APIResource.ITEM_CLASS not set.')
         if attr in self.items:
-            return self.ITEM_CLASS(self.auth, self.items[attr], nested=(attr not in RESOURCE_ACTIONS))
+            return self.__class__.ITEM_CLASS(self.auth, 
+                self.items[attr], 
+                nested=(attr not in self.RESOURCE_ACTIONS), 
+            )
         return self.__getattribute__(attr)
 
 class APIResourceItem(object):
     """Item in a APIResource - Either a nested resource or an action."""
+
+    RESOURCE_CLASS = None
 
     def __init__(self, auth, action, nested=False):
         self.auth = auth
@@ -54,6 +66,7 @@ class APIResourceItem(object):
         :return: Response
         :rtype: ``Response``
         """
+        kwargs = self._process_call_arguments(kwargs)
         # Post Data
         data = kwargs['data'] if ('data' in kwargs) else None
         # Params
@@ -85,7 +98,10 @@ class APIResourceItem(object):
     def __getattr__(self, attr):
         """getattr override to allow calling nested resources eg client.users.badge"""
         if attr in self.nested_actions:
-            return self.__class__(self.auth, self.nested_actions[attr], nested=(attr not in RESOURCE_ACTIONS))
+            return self.__class__(self.auth, 
+                self.nested_actions[attr], 
+                nested=(attr not in self.__class__.RESOURCE_CLASS.RESOURCE_ACTIONS)
+            )
         return self.__getattribute__(attr)
 
     def _get_base_url(self):
@@ -103,3 +119,13 @@ class APIResourceItem(object):
         :rtype: ``dict``
         """
         raise Exception('Error: _get_headers is not implemented.')
+
+    def _process_call_arguments(self, kwargs):
+        """Optionally process the kwargs before proceeding.
+        For example, add a kwarg "operations" and condense it into a format to be posted as "data".
+
+        :return: kwargs
+        :rtype: ``kwargs``
+        """
+        return kwargs
+
