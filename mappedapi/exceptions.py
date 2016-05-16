@@ -1,4 +1,4 @@
-class MappableRESTfulAPIRequestError(Exception):
+class MappedAPIRequestError(Exception):
     """Wraps requests.exceptions.HTTPError for convenience and give a little more info in the message."""
 
     def __init__(self, request, response):
@@ -23,7 +23,7 @@ class MappableRESTfulAPIRequestError(Exception):
             'status_code': response.status_code,
             'url': request.url,
         }
-        super(MappableRESTfulAPIRequestError, self).__init__(message)
+        super(MappedAPIRequestError, self).__init__(message)
         self.message = message
         self.request = request
         self.response = response

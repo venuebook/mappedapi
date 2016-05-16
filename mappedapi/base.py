@@ -1,12 +1,6 @@
 import itertools
 import requests
-from mappablerestfulapi.exceptions import MappableRESTfulAPIRequestError
-
-class APIRegistry(object):
-    """Manage API Classes"""
-    def __init__(self, resource_class, item_class, resource_mapping, resource_actions)
-
-    def 
+from mappedapi.exceptions import MappedAPIRequestError
 
 class APIResource(object):
     """Top Level API Resource"""
@@ -44,8 +38,6 @@ class APIResource(object):
 
 class APIResourceItem(object):
     """Item in a APIResource - Either a nested resource or an action."""
-
-    RESOURCE_CLASS = None
 
     def __init__(self, auth, action, nested=False):
         self.auth = auth
@@ -92,7 +84,7 @@ class APIResourceItem(object):
             try:
                 response.raise_for_status()
             except requests.exceptions.HTTPError as e:
-                raise MappableRESTfulAPIRequestError(request=e.request, response=e.response)
+                raise MappedAPIRequestError(request=e.request, response=e.response)
         return response
 
     def __getattr__(self, attr):
