@@ -89,7 +89,7 @@ class APIResourceItem(object):
         return self.__getattribute__(attr)
 
     def _get_base_url(self):
-        """Override Me
+        """Get base API url.
 
         :return: base app url
         :rtype: ``string``
@@ -97,7 +97,7 @@ class APIResourceItem(object):
         raise Exception('Error: _get_base_url is not implemented.')
 
     def _get_headers(self):
-        """Override Me
+        """Get Headers (Including "Authorization") for requests.
 
         :return: headers.
         :rtype: ``dict``
