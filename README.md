@@ -39,12 +39,12 @@ RESOURCE_MAPPING = {
     'dogs': {
         {'shibes':
             'get': {
-                'endpoint_base': ['dogs', 'doges'],
+                'endpoint_base': ['dogs', 'shibes'],
                 'ids': ['dog_id'],
                 'verb': 'get',
             },
             'post': {
-                'endpoint_base': ['dogs', 'doges'],
+                'endpoint_base': ['dogs', 'shibes'],
                 'ids': ['dog_id'],
                 'verb': 'post',
             },
