@@ -7,7 +7,6 @@ class APIResource(object):
 
     ITEM_CLASS = None
     RESOURCE_MAPPING = []
-    RESOURCE_ACTIONS = []
 
     def __init__(self, auth, items):
         self.auth = auth
@@ -30,18 +29,15 @@ class APIResource(object):
         if not self.__class__.ITEM_CLASS:
             raise Exception('Error: APIResource.ITEM_CLASS not set.')
         if attr in self.items:
-            return self.__class__.ITEM_CLASS(self.auth, 
-                self.items[attr], 
-                nested=(attr not in self.RESOURCE_ACTIONS), 
-            )
+            return self.__class__.ITEM_CLASS(self.auth, self.items[attr])
         return self.__getattribute__(attr)
 
 class APIResourceItem(object):
     """Item in a APIResource - Either a nested resource or an action."""
 
-    def __init__(self, auth, action, nested=False):
+    def __init__(self, auth, action):
         self.auth = auth
-        if nested:
+        if ('verb' not in action): # No HTTP verb - this is a nested action.
             self.nested_actions = action
             return
         self.nested_actions = []
@@ -90,10 +86,7 @@ class APIResourceItem(object):
     def __getattr__(self, attr):
         """getattr override to allow calling nested resources eg client.users.badge"""
         if attr in self.nested_actions:
-            return self.__class__(self.auth, 
-                self.nested_actions[attr], 
-                nested=(attr not in self.__class__.RESOURCE_CLASS.RESOURCE_ACTIONS)
-            )
+            return self.__class__(self.auth, self.nested_actions[attr])
         return self.__getattribute__(attr)
 
     def _get_base_url(self):
