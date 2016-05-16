@@ -1,6 +1,6 @@
 import itertools
 import requests
-from exceptions import MappableRESTfulAPIRequestError
+from mappable_api.exceptions import MappableRESTfulAPIRequestError
 from settings.API_MAPPING import RESOURCE_MAPPING, RESOURCE_ACTIONS
 
 class APIResource(object):
