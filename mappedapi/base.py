@@ -3,7 +3,7 @@ import requests
 from mappedapi.exceptions import MappedAPIRequestError
 
 class APIResource(object):
-    """Item in a APIResource - Either a nested resource or an children."""
+    """Either a nested resource or an API action."""
 
     def __init__(self, auth, children):
         self.auth = auth
