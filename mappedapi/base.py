@@ -3,47 +3,30 @@ import requests
 from mappedapi.exceptions import MappedAPIRequestError
 
 class APIResource(object):
-    """Top Level API Resource"""
+    """Item in a APIResource - Either a nested resource or an children."""
 
-    ITEM_CLASS = None
-    RESOURCE_MAPPING = []
-
-    def __init__(self, auth, items):
+    def __init__(self, auth, children):
         self.auth = auth
-        self.items = items
+        if ('verb' not in children): # No HTTP verb - this is nested.
+            self.nested_children = children
+            return
+        self.nested_children = []
+        self.endpoint_base = children['endpoint_base']
+        self.ids = children['ids']
+        self.verb = children['verb']
 
     @classmethod
-    def map(cls, auth, resource):
+    def map(cls, auth, resource, resource_mapping):
         """ Instantiate APIResource with Client authorization from resource name.
         :param dict auth: Client authorization.
         :param string resource: Resource name.
+        :param dict resource_mapping: Resource mapping.
         :return: API Resource
         :rtype: ``APIResource``
         """
-        if not resource in cls.RESOURCE_MAPPING:
+        if not resource in resource_mapping:
             return None
-        return cls(auth=auth, items=cls.RESOURCE_MAPPING[resource])
-
-    def __getattr__(self, attr):
-        """getattr override to allow calling actions and nested resources eg client.users"""
-        if not self.__class__.ITEM_CLASS:
-            raise Exception('Error: APIResource.ITEM_CLASS not set.')
-        if attr in self.items:
-            return self.__class__.ITEM_CLASS(self.auth, self.items[attr])
-        return self.__getattribute__(attr)
-
-class APIResourceItem(object):
-    """Item in a APIResource - Either a nested resource or an action."""
-
-    def __init__(self, auth, action):
-        self.auth = auth
-        if ('verb' not in action): # No HTTP verb - this is a nested action.
-            self.nested_actions = action
-            return
-        self.nested_actions = []
-        self.endpoint_base = action['endpoint_base']
-        self.ids = action['ids']
-        self.verb = action['verb']
+        return cls(auth=auth, children=resource_mapping[resource])
 
     def __call__(self, **kwargs):        
         """Perform a http request via the specified method to an API endpoint.
@@ -85,9 +68,9 @@ class APIResourceItem(object):
 
     def __getattr__(self, attr):
         """getattr override to allow calling nested resources eg client.users.badge"""
-        if attr in self.nested_actions:
-            return self.__class__(self.auth, self.nested_actions[attr])
-        return self.__getattribute__(attr)
+        if attr in self.nested_children:
+            return self.__class__(self.auth, self.nested_children[attr])
+        raise AttributeError("'APIResource' object has no attribute '%s'" % attr)
 
     def _get_base_url(self):
         """Get base API url.
@@ -118,22 +101,22 @@ class Client(object):
     """Base object for API Client."""
 
     RESOURCE_CLASS = None
+    RESOURCE_MAPPING = []
 
-    def __init__(self, access_token):
-        """
-        Example Usage:
+    def __init__(self):
+        """Initialize Client.
 
-        Client(access_token=config.ACCESS_TOKEN)
+        Override and provide call to super:
 
-        :param string access_token: Access Token
-        """
-        self.auth = {'token': access_token}
+        super(Client).__init__(self)"""
+        if not self.__class__.RESOURCE_CLASS:
+            raise Exception('Error: Client.RESOURCE_CLASS not set.')
+        if not self.__class__.RESOURCE_MAPPING:
+            raise Exception('Error: Client.RESOURCE_MAPPING not set.')
 
     def __getattr__(self, attr):
         """getattr override to allow calling API Resources eg client.users"""
-        if not self.__class__.RESOURCE_CLASS:
-            raise Exception('Error: Client.RESOURCE_CLASS not set.')
-        resource = self.RESOURCE_CLASS.map(self.auth, attr)
+        resource = self.RESOURCE_CLASS.map(self.auth, attr, self.__class__.RESOURCE_MAPPING)
         if not resource:
             raise AttributeError("'Client' object has no attribute '%s'" % attr)
         return resource

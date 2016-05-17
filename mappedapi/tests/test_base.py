@@ -41,7 +41,7 @@ RESOURCE_MAPPING = {
     },
 }
 
-class APIResourceItem(mappedapi.base.APIResourceItem):
+class APIResource(mappedapi.base.APIResource):
     """Item in a APIResource - Either a nested resource or an action."""
 
     def _get_base_url(self):
@@ -52,15 +52,12 @@ class APIResourceItem(mappedapi.base.APIResourceItem):
             'Authorization': 'Bearer %s' % self.auth['token'],
         }
 
-class APIResource(mappedapi.base.APIResource):
-    """Top Level API Resource"""
-
-    ITEM_CLASS = APIResourceItem
-    RESOURCE_MAPPING = RESOURCE_MAPPING
-
 class Client(mappedapi.base.Client):
     RESOURCE_CLASS = APIResource
+    RESOURCE_MAPPING = RESOURCE_MAPPING
+
     def __init__(self, access_token):
+        super(Client, self).__init__()
         self.auth = {'token': access_token}
 
 ########################
@@ -71,6 +68,10 @@ class Client(mappedapi.base.Client):
 def client():
     """Setup RequestHandler instance with test values."""
     return Client('Token')
+
+def test_getattr_auth():
+    """Test getting an attribute that does exist."""
+    assert('token' in client().auth)
 
 def test_getattr_error_api_resource():
     """Test getting an attribute that doesn't exist."""

@@ -23,19 +23,6 @@ python setup.py install
 ```python
 ## example/__init__.py
 
-## example/client.py
-import mappedapi.base
-from example.api import APIResource
-
-class Client(object):
-    RESOURCE_CLASS = APIResource
-    def __init__(self, access_token):
-        self.auth = {'token': access_token}
-
-## example/settings.py
-API_BASE_URL = 'https://www.example.com/api/'
-API_VERSION = '3'
-
 ## example/mapping.py
 RESOURCE_MAPPING = {
     'dogs': {
@@ -55,12 +42,29 @@ RESOURCE_MAPPING = {
         },
     },
 }
-## example/api.py
+
+## example/client.py
 import mappedapi.base
 from example import mapping
+from example.api import APIResource
+
+class Client(object):
+    RESOURCE_CLASS = APIResource
+    RESOURCE_MAPPING = mapping.RESOURCE_MAPPING
+
+    def __init__(self, access_token):
+        super(Client, self).__init__()
+        self.auth = {'token': access_token}
+
+## example/settings.py
+API_BASE_URL = 'https://www.example.com/api/'
+API_VERSION = '3'
+
+## example/api.py
+import mappedapi.base
 from example import settings
 
-class APIResourceItem(mappedapi.base.APIResourceItem):
+class APIResource(mappedapi.base.APIResourceItem):
     """Item in a APIResource - Either a nested resource or an action."""
 
     def _get_base_url(self):
@@ -78,12 +82,6 @@ class APIResourceItem(mappedapi.base.APIResourceItem):
                 data.append({'operation': operation[0], 'property': operation[1], 'value': operation[2]})
             kwargs['data'] = data
         return kwargs
-
-class APIResource(mappedapi.base.APIResource):
-    """Top Level API Resource"""
-
-    ITEM_CLASS = APIResourceItem
-    RESOURCE_MAPPING = mapping.RESOURCE_MAPPING
 
 ## run.py
 
