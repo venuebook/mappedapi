@@ -27,3 +27,13 @@ class MappedAPIRequestError(Exception):
         self.message = message
         self.request = request
         self.response = response
+
+class MappedAPIValidationError(Exception):
+    """Validation error."""
+
+    def __init__(self, message):
+        """
+        :param string message: Error message.
+        """
+        super(MappedAPIValidationError, self).__init__(message)
+        self.message = message

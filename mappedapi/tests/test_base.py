@@ -15,7 +15,7 @@ BASE_URL = 'http://localhost'
 
 TEST_DOG_ID = '1'
 TEST_DOG = {
-    'display_name': 'Doctor Woof',
+    'name': 'Doctor Woof',
     'bark': 'loud',
     'doge': 'wow',
 }
@@ -29,12 +29,13 @@ RESOURCE_MAPPING = {
         'shibes': {
             'get': {
                 'endpoint_base': ['dogs', 'shibes'],
-                'ids': ['dog_id'],
+                'endpoint_ids': ['dog_id'],
                 'verb': 'get',
             },
             'post': {
                 'endpoint_base': ['dogs', 'shibes'],
-                'ids': ['dog_id'],
+                'endpoint_ids': ['dog_id'],
+                'required_args': ['name'],
                 'verb': 'post',
             },
         },
@@ -92,8 +93,8 @@ def test_getattr_error_client():
     assert(exception_info.typename == 'AttributeError')
 
 @responses.activate
-def test_error():
-    """Test client.users.get"""
+def test_request_error():
+    """Test client.users.get request error"""
     responses.add(method=responses.GET,
         url='%s/dogs/%s/shibes' % (BASE_URL, TEST_DOG_ID),
         body=json.dumps(TEST_DOG),
@@ -103,6 +104,12 @@ def test_error():
     with pytest.raises(Exception) as exception_info:
         r = client().dogs.shibes.get(dog_id=TEST_DOG_ID)
     assert exception_info.typename == 'MappedAPIRequestError'
+
+def test_validation_error():
+    """Test client.users.post validation error"""
+    with pytest.raises(Exception) as exception_info:
+        r = client().dogs.shibes.post(dog_id=TEST_DOG_ID, data={'bark':'loud'})
+    assert exception_info.typename == 'MappedAPIValidationError'
 
 @responses.activate
 def test_endpoint_get():

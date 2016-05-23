@@ -37,6 +37,7 @@ RESOURCE_MAPPING = {
                 # https://www.example.com/api/3/dogs/{dog_id}/shibes
                 'endpoint_base': ['dogs', 'shibes'],
                 'endpoint_ids': ['dog_id'],
+                'required_args': ['name'],
                 'verb': 'post',
             },
         },

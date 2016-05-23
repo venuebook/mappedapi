@@ -1,11 +1,16 @@
 import itertools
 import requests
-from mappedapi.exceptions import MappedAPIRequestError
+from mappedapi.exceptions import MappedAPIRequestError, MappedAPIValidationError
 
 class APIResource(object):
     """Either a nested resource or an API action."""
 
     def __init__(self, auth, children):
+        """Initialize
+
+        :param dict auth: Client authorization.
+        :param dict children: Mapping.
+        """
         self.auth = auth
         if ('verb' not in children): # No HTTP verb - this is nested.
             self.nested_children = children
@@ -13,7 +18,8 @@ class APIResource(object):
         self.nested_children = []
         self.endpoint_base = children['endpoint_base']
         self.endpoint_ids = children['endpoint_ids']
-        self.verb = children['verb']
+        self.required_args = children['required_args'] if ('required_args' in children) else None
+        self.verb = children['verb'].lower()
 
     @classmethod
     def map(cls, auth, resource, resource_mapping):
@@ -42,6 +48,16 @@ class APIResource(object):
         data = kwargs['data'] if ('data' in kwargs) else None
         # Params
         params = kwargs['params'] if ('params' in kwargs) else None
+        if self.required_args:
+            target = params if (self.verb == 'get') else data
+            missing = []
+            for arg in self.required_args:
+                if not arg in target:
+                    missing.append(arg)
+            if missing:
+                raise MappedAPIValidationError(
+                    message='Missing required arguments: %s' % ','.join(missing)
+                )
         # Headers
         headers = self._get_headers()
         # Ids
