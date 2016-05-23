@@ -12,7 +12,7 @@ class APIResource(object):
             return
         self.nested_children = []
         self.endpoint_base = children['endpoint_base']
-        self.ids = children['ids']
+        self.endpoint_ids = children['endpoint_ids']
         self.verb = children['verb']
 
     @classmethod
@@ -31,7 +31,7 @@ class APIResource(object):
     def __call__(self, **kwargs):        
         """Perform a http request via the specified method to an API endpoint.
         :param kwargs kwargs: Keyword arguments:
-            ids (navigation ids for data types (conversations, forms, etc),
+            endpoint_ids (navigation endpoint_ids for data types (conversations, forms, etc),
             data={} # post/put/patch data
             params={} # get data
         :return: Response
@@ -45,9 +45,9 @@ class APIResource(object):
         # Headers
         headers = self._get_headers()
         # Ids
-        ids = [kwargs[id_arg] for id_arg in self.ids if id_arg in kwargs] if (self.ids) else None
-        if ids:
-            endpoint = '/'.join(list(next(i) for i in itertools.cycle([iter(self.endpoint_base), iter(ids)])))
+        endpoint_ids = [kwargs[id_arg] for id_arg in self.endpoint_ids if id_arg in kwargs] if (self.endpoint_ids) else None
+        if endpoint_ids:
+            endpoint = '/'.join(list(next(i) for i in itertools.cycle([iter(self.endpoint_base), iter(endpoint_ids)])))
         else:
             endpoint = '/'.join(self.endpoint_base)
         # URL
