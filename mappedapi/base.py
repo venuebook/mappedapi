@@ -1,5 +1,6 @@
 import itertools
 import requests
+from mappedapi import settings
 from mappedapi.exceptions import MappedAPIRequestError, MappedAPIValidationError
 
 class APIResource(object):
