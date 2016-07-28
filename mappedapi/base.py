@@ -71,6 +71,7 @@ class APIResource(object):
         # Request
         response = requests.__getattribute__(self.verb)(
             url=url,
+            hooks=settings.REQUEST_HOOK,
             headers=headers,
             json=data,
             params=params,
