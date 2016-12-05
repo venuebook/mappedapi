@@ -1,6 +1,6 @@
 ## Mapped API ##
 
-[![Build Status](https://travis-ci.com/venuebook/mappedapi.svg?token=j1A1J2RZ8nCwcqmzbYLx&branch=master)](https://travis-ci.com/venuebook/mappedapi)
+[![Build Status](https://travis-ci.org/venuebook/mappedapi.svg?branch=master)](https://travis-ci.com/venuebook/mappedapi)
 
 A python library for an easily mapped RESTful API.
 
